@@ -16,7 +16,7 @@ export const Experience = () => {
         <meshStandardMaterial color="#555" />
       </Backdrop>
 
-      <SoftShadows size={25} />
+      <SoftShadows size={52} samples={16} />
 
       {/* Key Light */}
       <directionalLight
