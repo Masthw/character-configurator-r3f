@@ -16,10 +16,22 @@ export const useConfiguratorStore = create((set) => ({
   customization: {},
   download: () => {},
   setDownload: (download) => set({ download }),
+  updateColor: (color) => {
+    set((state) => ({
+      customization: {
+        ...state.customization,
+        [state.currentCategory.name]: {
+          ...state.customization[state.currentCategory.name],
+          color,
+        },
+      },
+    }));
+  },
   fetchCategories: async () => {
     // you can also fetch all records at once via getFullList
     const categories = await pb.collection("CustomizationGroups").getFullList({
       sort: "+position",
+      expand: "colorPalette",
     });
     const assets = await pb.collection("CustomizationAssets").getFullList({
       sort: "-created",
@@ -28,9 +40,12 @@ export const useConfiguratorStore = create((set) => ({
     categories.forEach((category) => {
       category.assets = assets.filter((asset) => asset.group === category.id);
       customization[category.name] = {
+        color: category.expand?.colorPalette?.colors?.[0] || "",
       };
       if (category.startingAsset) {
-        customization[category.name].asset = category.assets.find((asset) => asset.id === category.startingAsset);
+        customization[category.name].asset = category.assets.find(
+          (asset) => asset.id === category.startingAsset
+        );
       }
     });
 
