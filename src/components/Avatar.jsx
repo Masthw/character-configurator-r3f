@@ -5,14 +5,47 @@ import { Suspense } from "react";
 import { Asset } from "./Asset";
 import { pb } from "../store";
 import { useEffect } from "react";
+import { GLTFExporter } from "three-stdlib";
+
 
 export const Avatar = ({ ...props }) => {
   const group = useRef();
   const { nodes } = useGLTF("models/Armature.glb");
   const { animations } = useFBX("models/Idle.fbx");
   const customization = useConfiguratorStore((state) => state.customization);
-
+  const setDownload = useConfiguratorStore((state) => state.setDownload);
   const { actions } = useAnimations(animations, group);
+
+  useEffect(() => {
+    function download() {
+      const exporter = new GLTFExporter();
+      exporter.parse(
+        group.current,
+        function (result) {
+          save(
+            new Blob([result], { type: "application/octet-stream" }),
+            `avatar_${+new Date()}.glb`
+          );
+        },
+        function (error) {
+          console.error(error);
+        },
+        {
+          binary: true,
+        }
+      );
+    }
+    const link = document.createElement("a");
+    link.style.display = "none";
+    document.body.appendChild(link);
+   
+    function save(blob, filename){
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+    }
+    setDownload(download);
+  }, []);
 
   useEffect(() => {
     actions["mixamo.com"]?.play();
