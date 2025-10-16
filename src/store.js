@@ -13,6 +13,7 @@ export const useConfiguratorStore = create((set) => ({
   categories: [],
   currentCategory: null,
   assets: [],
+  customization: {},
   fetchCategories: async () => {
     // you can also fetch all records at once via getFullList
     const categories = await pb.collection("CustomizationGroups").getFullList({
@@ -21,14 +22,25 @@ export const useConfiguratorStore = create((set) => ({
     const assets = await pb.collection("CustomizationAssets").getFullList({
       sort: "-created",
     });
+    const customization = {};
     categories.forEach((category) => {
-        category.assets = assets.filter((asset) => asset.group === category.id);
+      category.assets = assets.filter((asset) => asset.group === category.id);
+      customization[category.name] = {};
     });
 
     set({
-      categories, currentCategory: categories[0],
-      assets
+      categories,
+      currentCategory: categories[0],
+      assets,
+      customization,
     });
   },
   setCurrentCategory: (category) => set({ currentCategory: category }),
+  changeAsset: (category, asset) =>
+    set((state) => ({
+      customization: {
+        ...state.customization,
+        [category]: { ...state.customization[category], asset },
+      },
+    })),
 }));

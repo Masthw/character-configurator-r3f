@@ -5,14 +5,19 @@ import { Experience } from "./components/Experience";
 function App() {
   return (
     <>
-    <UI />
+      <UI />
       <Canvas
         camera={{
-          position: [3, 3, 3],
+          position: [-1, 1, 5],
+          fov: 45,
         }}
+        shadows
       >
-        <color attach="background" args={["#333333"]} />
-        <Experience />
+        <color attach="background" args={["#555"]} />
+        <fog attach="fog" args={["#555", 15, 25]} />
+        <group position-y={-1}>
+          <Experience />
+        </group>
       </Canvas>
     </>
   );
