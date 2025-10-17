@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { MeshStandardMaterial } from "three";
+import { randInt } from "three/src/math/MathUtils";
 
 import PocketBase from "pocketbase";
 
@@ -14,7 +15,7 @@ export const useConfiguratorStore = create((set, get) => ({
   categories: [],
   currentCategory: null,
   assets: [],
-  skin: new MeshStandardMaterial({ color: "#f5c6a5", roughness: 1}),
+  skin: new MeshStandardMaterial({ color: "#f5c6a5", roughness: 1 }),
   customization: {},
   download: () => {},
   setDownload: (download) => set({ download }),
@@ -72,4 +73,28 @@ export const useConfiguratorStore = create((set, get) => ({
         [category]: { ...state.customization[category], asset },
       },
     })),
+  randomize: () => {
+    const customization = {};
+    get().categories.forEach((category) => {
+      let randomAsset =
+        category.assets[randInt(0, category.assets.length - 1)];
+      if (category.removable) {
+        if (randInt(0, category.assets.length - 1) === 0) {
+          randomAsset = null;
+        }
+      }
+      const randomColor =
+        category.expand?.colorPalette?.colors?.[
+          randInt(0, category.expand.colorPalette.colors.length - 1)
+        ];
+      customization[category.name] = {
+        color: randomColor,
+        asset: randomAsset,
+      };
+      if (category.name === "Head") {
+        get().updateSkin(randomColor);
+      }
+    });
+    set({ customization });
+  },
 }));
